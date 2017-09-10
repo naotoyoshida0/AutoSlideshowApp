@@ -10,12 +10,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.transition.Slide;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Timer;
@@ -31,7 +31,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     Handler mHandler = new Handler();
 
+    Cursor cursor ;
+    Slide slide ;
 
+
+
+        public  void main(){
+            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
+            Long id = cursor.getLong(fieldIndex);
+            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+
+            ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
+            imageVIew.setImageURI(imageUri);
+        }
 
 
     private static final int PERMISSIONS_REQUEST_CODE = 100;
@@ -61,22 +73,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
+
         // 　Android 6.0以降の場合
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // パーミッションの許可状態を確認する
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 // 許可されている
                 getContentsInfo();
-            } else {
+            } else {//拒否されているときの処理
+                if(ActivityCompat.shouldShowRequestPermissionRationale(this,android.Manifest.permission.READ_EXTERNAL_STORAGE)){
+                    //再度許可を求める
+                    ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+                }else
                 // 許可されていないので許可ダイアログを表示する
                 Toast.makeText(this,"許可してください",Toast.LENGTH_SHORT).show();
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
             }
             // Android 5系以下の場合
         } else {
+
             getContentsInfo();
         }
     }
+
 
     @Override     //選択結果を受け取る
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -85,8 +104,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getContentsInfo();
                 }
-                break;
-            default:
+                else {
+                    break;
+                } default:
                 break;
         }
     }
@@ -95,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // 画像の情報を取得する
         ContentResolver resolver = getContentResolver();
-        Cursor cursor = resolver.query(
+         cursor = resolver.query(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // 外部ストレージの画像を指定
                 null, // 項目(null = 全項目)
                 null, // フィルタ条件(null = フィルタなし)
@@ -105,57 +125,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
-    Cursor cursor = null;
+
+
+
 
     @Override
 
     public void onClick(View v) {
-        if(cursor == null)  {
-            ContentResolver resolver = getContentResolver();
-            cursor  = resolver.query(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, // 外部ストレージの画像を指定
-                    null, // 項目(null = 全項目)
-                    null, // フィルタ条件(null = フィルタなし)
-                    null, // フィルタ用パラメータ
-                    null // ソート (null ソートなし)
-            );
-        }
+
         if (v.getId() ==R.id.button2) {//button2に画像送り機能
             if (cursor.moveToNext()) {
-                int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                Long id = cursor.getLong(fieldIndex);
-                Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-                imageVIew.setImageURI(imageUri);
+              main();
             }
 
 
             else if(cursor.moveToFirst());
-            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-            Long id = cursor.getLong(fieldIndex);
-            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-            ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-            imageVIew.setImageURI(imageUri);
+              main();
         }
+
+
 
         if (v.getId() ==R.id.button1) {//button1に画像戻り機能
             if (cursor.moveToPrevious()) {
-                int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                Long id = cursor.getLong(fieldIndex);
-                Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-                imageVIew.setImageURI(imageUri);
+                main();
             }
 
 
             else if(cursor.moveToLast());
-            int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-            Long id = cursor.getLong(fieldIndex);
-            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-            ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-            imageVIew.setImageURI(imageUri);
+              main();
 
         }
 
@@ -179,12 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 @Override
                                 public void run() {
                                     if (cursor.moveToNext()) {
-                                        int fieldIndex = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                                        Long id = cursor.getLong(fieldIndex);
-                                        Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
-
-                                        ImageView imageVIew = (ImageView) findViewById(R.id.imageView);
-                                        imageVIew.setImageURI(imageUri);
+                                        main();
                                     }
 
                                 }
@@ -215,4 +207,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
+
 }
