@@ -81,13 +81,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // 許可されている
                 getContentsInfo();
             } else {//拒否されているときの処理
-                if(ActivityCompat.shouldShowRequestPermissionRationale(this,android.Manifest.permission.READ_EXTERNAL_STORAGE)){
-                    //再度許可を求める
-                    ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
-                }else
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
+
+
                 // 許可されていないので許可ダイアログを表示する
-                Toast.makeText(this,"許可してください",Toast.LENGTH_SHORT).show();
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+
             }
             // Android 5系以下の場合
         } else {
@@ -104,12 +102,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getContentsInfo();
                 }
-                else {
-                    break;
-                } default:
-                break;
+                else  {
+
+                   Toast.makeText(this, "パーミッションが許可されていません", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "許可されるまでボタン機能をOFFします", Toast.LENGTH_SHORT).show();
+                    Button button1 = (Button) findViewById(R.id.button1);
+                    button1.setEnabled(false);
+                    Button button2 = (Button) findViewById(R.id.button2);
+                    button2.setEnabled(false);
+                    Button button3 = (Button) findViewById(R.id.button3);
+                    button3.setEnabled(false);
+
+            }
+                }
+            return;
         }
-    }
+
+
 
     public void getContentsInfo() {
 
